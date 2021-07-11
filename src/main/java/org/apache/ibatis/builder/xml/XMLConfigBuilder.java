@@ -50,13 +50,16 @@ import org.apache.ibatis.type.JdbcType;
 /**
  * @author Clinton Begin
  * @author Kazuki Shimizu
+ *
+ * 继承 BaseBuilder 抽象类，XML 配置构建器，主要负责解析 mybatis-config.xml 配置文件
+ *
  */
 public class XMLConfigBuilder extends BaseBuilder {
 
-  private boolean parsed;
-  private final XPathParser parser;
-  private String environment;
-  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();
+  private boolean parsed;  // 是否已解析
+  private final XPathParser parser;   // 基于 Java XPath 解析器
+  private String environment;  // 环境
+  private final ReflectorFactory localReflectorFactory = new DefaultReflectorFactory();  //  ReflectorFactory 对象
 
   public XMLConfigBuilder(Reader reader) {
     this(reader, null, null);
@@ -103,16 +106,24 @@ public class XMLConfigBuilder extends BaseBuilder {
   private void parseConfiguration(XNode root) {
     try {
       // issue #117 read properties first
+
+      // <1> 解析 <properties /> 标签
       propertiesElement(root.evalNode("properties"));
+
+      // <2> 解析 <settings /> 标签
       Properties settings = settingsAsProperties(root.evalNode("settings"));
       loadCustomVfs(settings);
       loadCustomLogImpl(settings);
+
+
       typeAliasesElement(root.evalNode("typeAliases"));
       pluginElement(root.evalNode("plugins"));
       objectFactoryElement(root.evalNode("objectFactory"));
       objectWrapperFactoryElement(root.evalNode("objectWrapperFactory"));
       reflectorFactoryElement(root.evalNode("reflectorFactory"));
       settingsElement(settings);
+
+
       // read it after objectFactory and objectWrapperFactory issue #631
       environmentsElement(root.evalNode("environments"));
       databaseIdProviderElement(root.evalNode("databaseIdProvider"));
@@ -183,11 +194,14 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void pluginElement(XNode parent) throws Exception {
     if (parent != null) {
-      for (XNode child : parent.getChildren()) {
+      for (XNode child : parent.getChildren()) {   // 遍历 <plugins /> 标签
         String interceptor = child.getStringAttribute("interceptor");
         Properties properties = child.getChildrenAsProperties();
+
+        // <1> 创建 Interceptor 对象，并设置属性
         Interceptor interceptorInstance = (Interceptor) resolveClass(interceptor).getDeclaredConstructor().newInstance();
         interceptorInstance.setProperties(properties);
+        // <2> 添加到 configuration 中
         configuration.addInterceptor(interceptorInstance);
       }
     }
@@ -195,8 +209,10 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void objectFactoryElement(XNode context) throws Exception {
     if (context != null) {
-      String type = context.getStringAttribute("type");
-      Properties properties = context.getChildrenAsProperties();
+      String type = context.getStringAttribute("type");  // 获得 ObjectFactory 的实现类
+      Properties properties = context.getChildrenAsProperties();  //  // 获得 Properties 属性
+
+      // <1> 创建 ObjectFactory 对象，并设置 Properties 属性
       ObjectFactory factory = (ObjectFactory) resolveClass(type).getDeclaredConstructor().newInstance();
       factory.setProperties(properties);
       configuration.setObjectFactory(factory);
@@ -362,27 +378,37 @@ public class XMLConfigBuilder extends BaseBuilder {
 
   private void mapperElement(XNode parent) throws Exception {
     if (parent != null) {
+      // <0> 遍历子节点
       for (XNode child : parent.getChildren()) {
-        if ("package".equals(child.getName())) {
+
+        if ("package".equals(child.getName())) {  // <1> 如果是 package 标签，则扫描该包
           String mapperPackage = child.getStringAttribute("name");
-          configuration.addMappers(mapperPackage);
-        } else {
+          configuration.addMappers(mapperPackage);   // 添加到 configuration 中
+
+        } else {   // 如果是 mapper 标签， // 获得 resource、url、class 属性
           String resource = child.getStringAttribute("resource");
           String url = child.getStringAttribute("url");
           String mapperClass = child.getStringAttribute("class");
+
+          // <2> 使用相对于类路径的资源引用
           if (resource != null && url == null && mapperClass == null) {
             ErrorContext.instance().resource(resource);
-            InputStream inputStream = Resources.getResourceAsStream(resource);
+            InputStream inputStream = Resources.getResourceAsStream(resource);  // 获得 resource 的 InputStream 对象
+
+            // 创建 XMLMapperBuilder 对象
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, resource, configuration.getSqlFragments());
-            mapperParser.parse();
-          } else if (resource == null && url != null && mapperClass == null) {
-            ErrorContext.instance().resource(url);
+            mapperParser.parse();    // 执行解析
+
+          } else if (resource == null && url != null && mapperClass == null) {   // <3> 使用完全限定资源定位符（URL）
+            ErrorContext.instance().resource(url);   // 获得 url 的 InputStream 对象
             InputStream inputStream = Resources.getUrlAsStream(url);
+
+            // 创建 XMLMapperBuilder 对象
             XMLMapperBuilder mapperParser = new XMLMapperBuilder(inputStream, configuration, url, configuration.getSqlFragments());
             mapperParser.parse();
-          } else if (resource == null && url == null && mapperClass != null) {
-            Class<?> mapperInterface = Resources.classForName(mapperClass);
-            configuration.addMapper(mapperInterface);
+          } else if (resource == null && url == null && mapperClass != null) {  // <4> 使用映射器接口实现类的完全限定类名
+            Class<?> mapperInterface = Resources.classForName(mapperClass);   // 获得 Mapper 接口
+            configuration.addMapper(mapperInterface); // 添加到 configuration 中
           } else {
             throw new BuilderException("A mapper element may only specify a url, resource or class, but not more than one.");
           }

@@ -36,6 +36,8 @@ import org.apache.ibatis.logging.LogFactory;
  * a properties was specified and no translation was found.
  *
  * @author Eduardo Macarron
+ *
+ * 实现 DatabaseIdProvider 接口，供应商数据库标识提供器实现类。
  */
 public class VendorDatabaseIdProvider implements DatabaseIdProvider {
 

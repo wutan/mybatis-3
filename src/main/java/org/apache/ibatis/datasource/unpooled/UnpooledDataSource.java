@@ -38,20 +38,31 @@ import org.apache.ibatis.io.Resources;
  */
 public class UnpooledDataSource implements DataSource {
 
+  // Driver 类加载器
   private ClassLoader driverClassLoader;
+
+  // Driver 属性
   private Properties driverProperties;
+
+  /**
+   * 已注册的 Driver 映射
+   *
+   * KEY：Driver 类名
+   * VALUE：Driver 对象
+   */
   private static Map<String, Driver> registeredDrivers = new ConcurrentHashMap<>();
 
+  // Driver 类名
   private String driver;
   private String url;
   private String username;
   private String password;
 
-  private Boolean autoCommit;
-  private Integer defaultTransactionIsolationLevel;
+  private Boolean autoCommit;  // 是否自动提交事务
+  private Integer defaultTransactionIsolationLevel;  // 默认的连接事务隔离级别
   private Integer defaultNetworkTimeout;
 
-  static {
+  static {  // 初始化 registeredDrivers
     Enumeration<Driver> drivers = DriverManager.getDrivers();
     while (drivers.hasMoreElements()) {
       Driver driver = drivers.nextElement();
@@ -206,7 +217,7 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(String username, String password) throws SQLException {
-    Properties props = new Properties();
+    Properties props = new Properties();   // 创建 Properties 对象
     if (driverProperties != null) {
       props.putAll(driverProperties);
     }
@@ -216,30 +227,31 @@ public class UnpooledDataSource implements DataSource {
     if (password != null) {
       props.setProperty("password", password);
     }
-    return doGetConnection(props);
+    return doGetConnection(props); // 执行获得 Connection 连接
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
-    initializeDriver();
-    Connection connection = DriverManager.getConnection(url, properties);
-    configureConnection(connection);
+    initializeDriver();  // <1> 初始化 Driver
+    Connection connection = DriverManager.getConnection(url, properties);  // <2> 获得 Connection 对象
+    configureConnection(connection);   // <3> 配置 Connection 对象
     return connection;
   }
 
   private synchronized void initializeDriver() throws SQLException {
-    if (!registeredDrivers.containsKey(driver)) {
+    if (!registeredDrivers.containsKey(driver)) {   // 判断 registeredDrivers 是否已经存在该 driver ，若不存在，进行初始化
       Class<?> driverType;
       try {
         if (driverClassLoader != null) {
-          driverType = Class.forName(driver, true, driverClassLoader);
+          driverType = Class.forName(driver, true, driverClassLoader);  // <2> 获得 driver 类
         } else {
           driverType = Resources.classForName(driver);
         }
         // DriverManager requires the driver to be loaded via the system ClassLoader.
         // http://www.kfu.com/~nsayer/Java/dyn-jdbc.html
+        // <3> 创建 Driver 对象
         Driver driverInstance = (Driver) driverType.getDeclaredConstructor().newInstance();
-        DriverManager.registerDriver(new DriverProxy(driverInstance));
-        registeredDrivers.put(driver, driverInstance);
+        DriverManager.registerDriver(new DriverProxy(driverInstance));  // 创建 DriverProxy 对象，并注册到 DriverManager 中
+        registeredDrivers.put(driver, driverInstance);  // 添加到 registeredDrivers 中
       } catch (Exception e) {
         throw new SQLException("Error setting driver on UnpooledDataSource. Cause: " + e);
       }
@@ -250,10 +262,10 @@ public class UnpooledDataSource implements DataSource {
     if (defaultNetworkTimeout != null) {
       conn.setNetworkTimeout(Executors.newSingleThreadExecutor(), defaultNetworkTimeout);
     }
-    if (autoCommit != null && autoCommit != conn.getAutoCommit()) {
+    if (autoCommit != null && autoCommit != conn.getAutoCommit()) {   // 设置自动提交
       conn.setAutoCommit(autoCommit);
     }
-    if (defaultTransactionIsolationLevel != null) {
+    if (defaultTransactionIsolationLevel != null) {  // 设置事务隔离级别
       conn.setTransactionIsolation(defaultTransactionIsolationLevel);
     }
   }
@@ -314,7 +326,7 @@ public class UnpooledDataSource implements DataSource {
   @Override
   public Logger getParentLogger() {
     // requires JDK version 1.6
-    return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);
+    return Logger.getLogger(Logger.GLOBAL_LOGGER_NAME);  // 因为 <4> 处，使用 MyBatis 自定义的 Logger 对象。
   }
 
 }

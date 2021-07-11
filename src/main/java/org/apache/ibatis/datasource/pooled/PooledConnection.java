@@ -25,6 +25,8 @@ import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Clinton Begin
+ *
+ * 实现 InvocationHandler 接口，池化的 Connection 对象。
  */
 class PooledConnection implements InvocationHandler {
 

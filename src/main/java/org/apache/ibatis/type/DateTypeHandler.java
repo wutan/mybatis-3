@@ -24,6 +24,10 @@ import java.util.Date;
 
 /**
  * @author Clinton Begin
+ *
+ * 继承 BaseTypeHandler 抽象类，Date 类型的 TypeHandler 实现类
+ *
+ * java.util.Date 和 java.sql.Timestamp 的互相转换。
  */
 public class DateTypeHandler extends BaseTypeHandler<Date> {
 
@@ -31,6 +35,8 @@ public class DateTypeHandler extends BaseTypeHandler<Date> {
   public void setNonNullParameter(PreparedStatement ps, int i, Date parameter, JdbcType jdbcType)
       throws SQLException {
     ps.setTimestamp(i, new Timestamp(parameter.getTime()));
+    // 将 Date 转换成 Timestamp 类型
+    // 然后设置到 ps 中
   }
 
   @Override
@@ -38,7 +44,7 @@ public class DateTypeHandler extends BaseTypeHandler<Date> {
       throws SQLException {
     Timestamp sqlTimestamp = rs.getTimestamp(columnName);
     if (sqlTimestamp != null) {
-      return new Date(sqlTimestamp.getTime());
+      return new Date(sqlTimestamp.getTime());  // 将 Timestamp 转换成 Date 类型
     }
     return null;
   }

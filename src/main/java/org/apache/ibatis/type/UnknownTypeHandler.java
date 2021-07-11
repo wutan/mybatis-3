@@ -29,13 +29,16 @@ import org.apache.ibatis.session.Configuration;
 
 /**
  * @author Clinton Begin
+ *
+ * 继承 BaseTypeHandler 抽象类，未知的 TypeHandler 实现类。通过获取对应的 TypeHandler
  */
 public class UnknownTypeHandler extends BaseTypeHandler<Object> {
 
+  // ObjectTypeHandler 单例
   private static final ObjectTypeHandler OBJECT_TYPE_HANDLER = new ObjectTypeHandler();
   // TODO Rename to 'configuration' after removing the 'configuration' property(deprecated property) on parent class
   private final Configuration config;
-  private final Supplier<TypeHandlerRegistry> typeHandlerRegistrySupplier;
+  private final Supplier<TypeHandlerRegistry> typeHandlerRegistrySupplier;  // TypeHandler 注册表
 
   /**
    * The constructor that pass a MyBatis configuration.
@@ -63,8 +66,8 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
   @Override
   public void setNonNullParameter(PreparedStatement ps, int i, Object parameter, JdbcType jdbcType)
       throws SQLException {
-    TypeHandler handler = resolveTypeHandler(parameter, jdbcType);
-    handler.setParameter(ps, i, parameter, jdbcType);
+    TypeHandler handler = resolveTypeHandler(parameter, jdbcType);  // 获得参数对应的处理器
+    handler.setParameter(ps, i, parameter, jdbcType);  // 使用 handler 设置参数
   }
 
   @Override
@@ -93,12 +96,12 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
   private TypeHandler<?> resolveTypeHandler(Object parameter, JdbcType jdbcType) {
     TypeHandler<?> handler;
     if (parameter == null) {
-      handler = OBJECT_TYPE_HANDLER;
+      handler = OBJECT_TYPE_HANDLER;   // 参数为空，返回 OBJECT_TYPE_HANDLER
     } else {
       handler = typeHandlerRegistrySupplier.get().getTypeHandler(parameter.getClass(), jdbcType);
       // check if handler is null (issue #270)
       if (handler == null || handler instanceof UnknownTypeHandler) {
-        handler = OBJECT_TYPE_HANDLER;
+        handler = OBJECT_TYPE_HANDLER;   // 获取不到，则使用 OBJECT_TYPE_HANDLER
       }
     }
     return handler;
@@ -108,7 +111,8 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
     try {
       Map<String,Integer> columnIndexLookup;
       columnIndexLookup = new HashMap<>();
-      ResultSetMetaData rsmd = rs.getMetaData();
+      ResultSetMetaData rsmd = rs.getMetaData();  // 通过 metaData
+
       int count = rsmd.getColumnCount();
       boolean useColumnLabel = config.isUseColumnLabel();
       for (int i = 1; i <= count; i++) {
@@ -131,10 +135,11 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
 
   private TypeHandler<?> resolveTypeHandler(ResultSetMetaData rsmd, Integer columnIndex) {
     TypeHandler<?> handler = null;
-    JdbcType jdbcType = safeGetJdbcTypeForColumn(rsmd, columnIndex);
-    Class<?> javaType = safeGetClassForColumn(rsmd, columnIndex);
+    JdbcType jdbcType = safeGetJdbcTypeForColumn(rsmd, columnIndex);  // 获得 JDBC Type 类型
+    Class<?> javaType = safeGetClassForColumn(rsmd, columnIndex);    // 获得 Java Type 类型
+
     if (javaType != null && jdbcType != null) {
-      handler = typeHandlerRegistrySupplier.get().getTypeHandler(javaType, jdbcType);
+      handler = typeHandlerRegistrySupplier.get().getTypeHandler(javaType, jdbcType);  //获得对应的 TypeHandler 对象
     } else if (javaType != null) {
       handler = typeHandlerRegistrySupplier.get().getTypeHandler(javaType);
     } else if (jdbcType != null) {
@@ -145,7 +150,10 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
 
   private JdbcType safeGetJdbcTypeForColumn(ResultSetMetaData rsmd, Integer columnIndex) {
     try {
+      // 获得 JDBC Type
+      // 从 ResultSetMetaData 中，获得字段类型
       return JdbcType.forCode(rsmd.getColumnType(columnIndex));
+
     } catch (Exception e) {
       return null;
     }
@@ -153,6 +161,9 @@ public class UnknownTypeHandler extends BaseTypeHandler<Object> {
 
   private Class<?> safeGetClassForColumn(ResultSetMetaData rsmd, Integer columnIndex) {
     try {
+
+      // 从 ResultSetMetaData 中，获得字段类型
+      // 获得 Java Type
       return Resources.classForName(rsmd.getColumnClassName(columnIndex));
     } catch (Exception e) {
       return null;

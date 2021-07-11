@@ -23,12 +23,14 @@ import org.apache.ibatis.cache.CacheException;
 
 /**
  * @author Clinton Begin
+ *
+ * 实现 Cache 接口，永不过期的 Cache 实现类，基于 HashMap 实现类。
  */
 public class PerpetualCache implements Cache {
 
-  private final String id;
+  private final String id;  // 标识
 
-  private final Map<Object, Object> cache = new HashMap<>();
+  private final Map<Object, Object> cache = new HashMap<>();  // 缓存容器
 
   public PerpetualCache(String id) {
     this.id = id;

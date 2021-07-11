@@ -21,12 +21,16 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ *
+ * 定时清空整个容器的 Cache 实现类。
+ *
+ * 每次缓存操作时，都调用 #clearWhenStale() 方法，根据情况，是否清空全部缓存
  */
 public class ScheduledCache implements Cache {
 
   private final Cache delegate;
-  protected long clearInterval;
-  protected long lastClear;
+  protected long clearInterval;  // 清空间隔，单位：毫秒
+  protected long lastClear;  // 最后清空时间，单位：毫秒
 
   public ScheduledCache(Cache delegate) {
     this.delegate = delegate;
@@ -45,7 +49,7 @@ public class ScheduledCache implements Cache {
 
   @Override
   public int getSize() {
-    clearWhenStale();
+    clearWhenStale();  // 判断是否要全部清空
     return delegate.getSize();
   }
 
@@ -62,7 +66,7 @@ public class ScheduledCache implements Cache {
 
   @Override
   public Object removeObject(Object key) {
-    clearWhenStale();
+    clearWhenStale();  // 判断是否要全部清空
     return delegate.removeObject(key);
   }
 

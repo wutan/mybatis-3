@@ -19,6 +19,8 @@ import java.util.Arrays;
 
 /**
  * Provides hashCode, equals and toString methods that can handle array.
+ *
+ * 工具类
  */
 public class ArrayUtil {
 
@@ -35,10 +37,10 @@ public class ArrayUtil {
       return 0;
     }
     final Class<?> clazz = obj.getClass();
-    if (!clazz.isArray()) {
+    if (!clazz.isArray()) {   // 普通类
       return obj.hashCode();
     }
-    final Class<?> componentType = clazz.getComponentType();
+    final Class<?> componentType = clazz.getComponentType(); // 数组类型
     if (long.class.equals(componentType)) {
       return Arrays.hashCode((long[]) obj);
     } else if (int.class.equals(componentType)) {

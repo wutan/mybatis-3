@@ -33,15 +33,18 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * @author Eduardo Macarron
+ *
+ * 匹配的 Java Type 类型的注解
+ *
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.TYPE)   // 注册到类
 public @interface MappedTypes {
   /**
    * Returns java types to map {@link TypeHandler}.
    *
    * @return java types
    */
-  Class<?>[] value();
+  Class<?>[] value();  // 匹配的 Java Type 类型的数组
 }

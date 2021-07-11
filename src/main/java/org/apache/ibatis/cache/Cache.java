@@ -37,6 +37,12 @@ import java.util.concurrent.locks.ReadWriteLock;
  * </pre>
  *
  * @author Clinton Begin
+ *
+ * 缓存容器接口。注意，它是一个容器，有点类似 HashMap ，可以往其中添加各种缓存。
+ *
+ * Cache 基于不同的缓存过期策略、特性，有不同的实现类。
+ * 可以组合多种 Cache ，实现特性的组合.装饰者模式
+ *
  */
 
 public interface Cache {
@@ -51,6 +57,8 @@ public interface Cache {
    *          Can be any object but usually it is a {@link CacheKey}
    * @param value
    *          The result of a select.
+   *
+   *          添加指定键的值
    */
   void putObject(Object key, Object value);
 
@@ -96,7 +104,10 @@ public interface Cache {
    * Any locking needed by the cache must be provided internally by the cache provider.
    *
    * @return A ReadWriteLock
+   *
+   * 获得读取写锁。该方法可以忽略了已经。
    */
+  @Deprecated
   default ReadWriteLock getReadWriteLock() {
     return null;
   }

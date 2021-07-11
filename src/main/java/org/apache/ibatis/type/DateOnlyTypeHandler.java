@@ -23,12 +23,19 @@ import java.util.Date;
 
 /**
  * @author Clinton Begin
+ *
+ * 继承 BaseTypeHandler 抽象类，Date 类型的 TypeHandler 实现类
+ *
+ * java.util.Date 和 java.sql.Date 的互相转换。
+ *
+ * 数据库里的时间有多种类型，以 MySQL 举例子，有 date、timestamp、datetime 三种类型。
  */
 public class DateOnlyTypeHandler extends BaseTypeHandler<Date> {
 
   @Override
   public void setNonNullParameter(PreparedStatement ps, int i, Date parameter, JdbcType jdbcType)
       throws SQLException {
+    // 将 java Date 转换成 sql Date 类型
     ps.setDate(i, new java.sql.Date(parameter.getTime()));
   }
 

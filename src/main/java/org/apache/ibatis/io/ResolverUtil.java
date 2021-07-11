@@ -57,6 +57,8 @@ import org.apache.ibatis.logging.LogFactory;
  * @author Tim Fennell
  * @param <T>
  *          the generic type
+ *
+ *          解析器工具类，用于获得指定目录符合条件的类们
  */
 public class ResolverUtil<T> {
 

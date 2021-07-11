@@ -33,6 +33,11 @@ import org.apache.ibatis.transaction.Transaction;
  *
  * @author Clinton Begin
  *
+ * 实现 Transaction 接口，基于容器管理的事务实现类
+ *
+ * 和 JdbcTransaction 相比，少了 autoCommit 属性，
+ * 空实现 #commit() 和 #rollback() 方法。因此，事务的管理，交给了容器。
+ *
  * @see ManagedTransactionFactory
  */
 public class ManagedTransaction implements Transaction {

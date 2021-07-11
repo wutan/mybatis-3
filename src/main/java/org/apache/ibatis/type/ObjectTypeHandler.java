@@ -22,6 +22,8 @@ import java.sql.SQLException;
 
 /**
  * @author Clinton Begin
+ *
+ * 继承 BaseTypeHandler 抽象类，Object 类型的 TypeHandler 实现类。
  */
 public class ObjectTypeHandler extends BaseTypeHandler<Object> {
 

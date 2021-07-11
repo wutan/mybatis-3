@@ -97,9 +97,11 @@ import org.apache.ibatis.type.TypeHandlerRegistry;
 
 /**
  * @author Clinton Begin
+ *
+ * XML 和注解中解析到的配置，最终都会设置到
  */
 public class Configuration {
-
+   //  DB 环境
   protected Environment environment;
 
   protected boolean safeRowBoundsEnabled;
@@ -137,7 +139,7 @@ public class Configuration {
   protected boolean lazyLoadingEnabled = false;
   protected ProxyFactory proxyFactory = new JavassistProxyFactory(); // #224 Using internal Javassist instead of OGNL
 
-  protected String databaseId;
+  protected String databaseId;  // 数据库标识
   /**
    * Configuration factory class.
    * Used to create Configuration for loading deserialized unread properties.
@@ -147,6 +149,8 @@ public class Configuration {
   protected Class<?> configurationFactory;
 
   protected final MapperRegistry mapperRegistry = new MapperRegistry(this);
+
+  //   拦截器链
   protected final InterceptorChain interceptorChain = new InterceptorChain();
   protected final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry(this);
   protected final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();

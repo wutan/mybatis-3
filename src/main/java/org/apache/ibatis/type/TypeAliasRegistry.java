@@ -34,12 +34,15 @@ import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
+ *
+ * 类型与别名的注册表。通过别名，
+ * 我们在 Mapper XML 中的 resultType 和 parameterType 属性，直接使用，而不用写全类名
  */
 public class TypeAliasRegistry {
-
+  // 类型与别名的映射。
   private final Map<String, Class<?>> typeAliases = new HashMap<>();
 
-  public TypeAliasRegistry() {
+  public TypeAliasRegistry() {   // 初始化默认的类型与别名
     registerAlias("string", String.class);
 
     registerAlias("byte", Byte.class);
@@ -139,12 +142,12 @@ public class TypeAliasRegistry {
   }
 
   public void registerAlias(Class<?> type) {
-    String alias = type.getSimpleName();
-    Alias aliasAnnotation = type.getAnnotation(Alias.class);
+    String alias = type.getSimpleName();   // <1> 默认为，简单类名
+    Alias aliasAnnotation = type.getAnnotation(Alias.class);  // <2> 如果有注解，使用注册上的名字
     if (aliasAnnotation != null) {
       alias = aliasAnnotation.value();
     }
-    registerAlias(alias, type);
+    registerAlias(alias, type);  // <3> 注册类型与别名的注册表
   }
 
   public void registerAlias(String alias, Class<?> value) {

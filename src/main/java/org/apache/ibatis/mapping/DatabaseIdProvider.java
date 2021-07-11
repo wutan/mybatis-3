@@ -33,5 +33,6 @@ public interface DatabaseIdProvider {
     // NOP
   }
 
+  // 获得数据库标识
   String getDatabaseId(DataSource dataSource) throws SQLException;
 }

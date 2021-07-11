@@ -28,11 +28,14 @@ import org.apache.ibatis.reflection.property.PropertyTokenizer;
 
 /**
  * @author Clinton Begin
+ *
+ * 继承 BaseWrapper 抽象类，
+ * 普通对象的 ObjectWrapper 实现类，例如 User、Order 这样的 POJO 类。
  */
 public class BeanWrapper extends BaseWrapper {
 
   private final Object object;
-  private final MetaClass metaClass;
+  private final MetaClass metaClass;  // 创建 MetaClass 对象
 
   public BeanWrapper(MetaObject metaObject, Object object) {
     super(metaObject);
@@ -40,6 +43,12 @@ public class BeanWrapper extends BaseWrapper {
     this.metaClass = MetaClass.forClass(object.getClass(), metaObject.getReflectorFactory());
   }
 
+
+  /**
+   * 获得集合类型的属性的指定位置的值。
+   *    例如说：User 对象的 list[0] 。
+   *       所调用的方法，都是 BaseWrapper 所提供的公用方法。
+   */
   @Override
   public Object get(PropertyTokenizer prop) {
     if (prop.getIndex() != null) {
@@ -51,12 +60,12 @@ public class BeanWrapper extends BaseWrapper {
   }
 
   @Override
-  public void set(PropertyTokenizer prop, Object value) {
+  public void set(PropertyTokenizer prop, Object value) {    // 设置集合类型的属性的指定位置的值
     if (prop.getIndex() != null) {
-      Object collection = resolveCollection(prop, object);
-      setCollectionValue(prop, collection, value);
+      Object collection = resolveCollection(prop, object);  // 获得集合类型的属性
+      setCollectionValue(prop, collection, value);  // 设置指定位置的值
     } else {
-      setBeanProperty(prop, object, value);
+      setBeanProperty(prop, object, value);   // 设置属性的值
     }
   }
 
@@ -76,13 +85,18 @@ public class BeanWrapper extends BaseWrapper {
   }
 
   @Override
-  public Class<?> getSetterType(String name) {
+  public Class<?> getSetterType(String name) {    // 获得指定属性的 getting 方法的返回值
     PropertyTokenizer prop = new PropertyTokenizer(name);
     if (prop.hasNext()) {
+      // <1> 创建 MetaObject 对象
       MetaObject metaValue = metaObject.metaObjectForProperty(prop.getIndexedName());
       if (metaValue == SystemMetaObject.NULL_META_OBJECT) {
+        // 如果 metaValue 为空，则基于 metaClass 获得返回类型
         return metaClass.getSetterType(name);
       } else {
+        // 如果 metaValue 非空，则基于 metaValue 获得返回类型。
+        // 例如：richType.richMap.nihao ，
+        // 其中 richMap 是 Map 类型，而 nihao 的类型，需要获得到 nihao 的具体值，才能做真正的判断
         return metaValue.getSetterType(prop.getChildren());
       }
     } else {
@@ -157,7 +171,9 @@ public class BeanWrapper extends BaseWrapper {
     return metaValue;
   }
 
+
   private Object getBeanProperty(PropertyTokenizer prop, Object object) {
+    // 通过调用 Invoker 方法，获得属性的值
     try {
       Invoker method = metaClass.getGetInvoker(prop.getName());
       try {

@@ -23,6 +23,7 @@ import java.util.Set;
 
 /**
  * @author Clinton Begin
+ * 简单类型注册表
  */
 public class SimpleTypeRegistry {
 

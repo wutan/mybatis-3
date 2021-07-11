@@ -24,20 +24,24 @@ import java.lang.reflect.Type;
  * @param <T> the referenced type
  * @since 3.1.0
  * @author Simone Tripodi
+ *
+ * 引用泛型抽象类。目的很简单，就是解析类上定义的泛型
  */
 public abstract class TypeReference<T> {
 
-  private final Type rawType;
+  private final Type rawType;  // 泛型
 
   protected TypeReference() {
     rawType = getSuperclassTypeParameter(getClass());
   }
 
   Type getSuperclassTypeParameter(Class<?> clazz) {
-    Type genericSuperclass = clazz.getGenericSuperclass();
+    Type genericSuperclass = clazz.getGenericSuperclass();   // 【1】从父类中获取 <T>
+
     if (genericSuperclass instanceof Class) {
       // try to climb up the hierarchy until meet something useful
-      if (TypeReference.class != genericSuperclass) {
+      // 能满足这个条件的，例如 GenericTypeSupportedInHierarchiesTestCase.CustomStringTypeHandler 这个类
+      if (TypeReference.class != genericSuperclass) {  // 排除 TypeReference 类
         return getSuperclassTypeParameter(clazz.getSuperclass());
       }
 
@@ -45,10 +49,11 @@ public abstract class TypeReference<T> {
         + "Remove the extension or add a type parameter to it.");
     }
 
+    // 【2】获取 <T>
     Type rawType = ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0];
     // TODO remove this when Reflector is fixed to return Types
     if (rawType instanceof ParameterizedType) {
-      rawType = ((ParameterizedType) rawType).getRawType();
+      rawType = ((ParameterizedType) rawType).getRawType();  // 必须是泛型，才获取 <T>
     }
 
     return rawType;

@@ -33,6 +33,8 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * @author Eduardo Macarron
+ *
+ * 匹配的 JDBC Type 类型的注解
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -43,12 +45,14 @@ public @interface MappedJdbcTypes {
    *
    * @return jdbc types
    */
-  JdbcType[] value();
+  JdbcType[] value(); // 匹配的 JDBC Type 类型的注解
 
   /**
    * Returns whether map to jdbc null type.
    *
    * @return {@code true} if map, {@code false} if otherwise
+   *
+   * 是否包含 {@link java.sql.JDBCType#NULL}
    */
   boolean includeNullJdbcType() default false;
 }

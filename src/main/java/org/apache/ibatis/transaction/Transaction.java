@@ -31,6 +31,8 @@ public interface Transaction {
    * @return DataBase connection
    * @throws SQLException
    *           the SQL exception
+   *
+   *            获得连接
    */
   Connection getConnection() throws SQLException;
 

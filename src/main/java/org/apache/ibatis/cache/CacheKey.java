@@ -24,12 +24,17 @@ import org.apache.ibatis.reflection.ArrayUtil;
 
 /**
  * @author Clinton Begin
+ *
+ * 实现 Cloneable、Serializable 接口，缓存键
+ *
+ * MyBatis 中的缓存键不是一个简单的 String ，
+ * 而是通过多个对象组成。所以 CacheKey 可以理解成将多个对象放在一起，计算其缓存键。
  */
 public class CacheKey implements Cloneable, Serializable {
 
   private static final long serialVersionUID = 1146682552656046210L;
 
-  public static final CacheKey NULL_CACHE_KEY = new CacheKey() {
+  public static final CacheKey NULL_CACHE_KEY = new CacheKey() {  // 单例 - 空缓存键
 
     @Override
     public void update(Object object) {
@@ -42,16 +47,18 @@ public class CacheKey implements Cloneable, Serializable {
     }
   };
 
-  private static final int DEFAULT_MULTIPLIER = 37;
-  private static final int DEFAULT_HASHCODE = 17;
+  private static final int DEFAULT_MULTIPLIER = 37; // 默认 {@link #multiplier} 的值
+  private static final int DEFAULT_HASHCODE = 17; // 默认 {@link #hashcode} 的值
 
-  private final int multiplier;
-  private int hashcode;
-  private long checksum;
-  private int count;
+  private final int multiplier; //  hashcode 求值的系数
+  private int hashcode; // 缓存键的 hashcode
+  private long checksum; // 校验和
+  private int count; // {@link #update(Object)} 的数量
+
   // 8/21/2017 - Sonarlint flags this as needing to be marked transient. While true if content is not serializable, this
   // is not always true and thus should not be marked transient.
-  private List<Object> updateList;
+
+  private List<Object> updateList; // 计算 {@link #hashcode} 的对象的集合
 
   public CacheKey() {
     this.hashcode = DEFAULT_HASHCODE;
@@ -62,7 +69,7 @@ public class CacheKey implements Cloneable, Serializable {
 
   public CacheKey(Object[] objects) {
     this();
-    updateAll(objects);
+    updateAll(objects);   // 基于 objects ，更新相关属性
   }
 
   public int getUpdateCount() {
@@ -70,15 +77,15 @@ public class CacheKey implements Cloneable, Serializable {
   }
 
   public void update(Object object) {
-    int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);
+    int baseHashCode = object == null ? 1 : ArrayUtil.hashCode(object);    // 方法参数 object 的 hashcode
 
     count++;
-    checksum += baseHashCode;
-    baseHashCode *= count;
+    checksum += baseHashCode;   // checksum 为 baseHashCode 的求和
+    baseHashCode *= count;  // 计算新的 hashcode 值
 
     hashcode = multiplier * hashcode + baseHashCode;
 
-    updateList.add(object);
+    updateList.add(object);  // 添加 object 到 updateList 中
   }
 
   public void updateAll(Object[] objects) {
@@ -134,8 +141,8 @@ public class CacheKey implements Cloneable, Serializable {
 
   @Override
   public CacheKey clone() throws CloneNotSupportedException {
-    CacheKey clonedCacheKey = (CacheKey) super.clone();
-    clonedCacheKey.updateList = new ArrayList<>(updateList);
+    CacheKey clonedCacheKey = (CacheKey) super.clone();  // 克隆 CacheKey 对象
+    clonedCacheKey.updateList = new ArrayList<>(updateList); // 创建 updateList 数组，避免原数组修改
     return clonedCacheKey;
   }
 

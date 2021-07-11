@@ -33,6 +33,8 @@ import java.lang.annotation.Target;
  * }
  * </pre>
  * @author Clinton Begin
+ *
+ * 别名的注解
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
@@ -43,5 +45,5 @@ public @interface Alias {
    *
    * @return the alias name
    */
-  String value();
+  String value();  // 别名
 }

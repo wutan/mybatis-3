@@ -19,6 +19,10 @@ import org.apache.ibatis.cache.Cache;
 
 /**
  * @author Clinton Begin
+ *
+ * 实现 Cache 接口，同步的 Cache 实现类。
+ *
+ * 相应的方法，添加了 synchronized 修饰符。
  */
 public class SynchronizedCache implements Cache {
 
